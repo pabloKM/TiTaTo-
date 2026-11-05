@@ -77,14 +77,27 @@ html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 #csp input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;border-radius:50%;background:#fff;border:4px solid #000}
 #csp input[type=range]::-moz-range-thumb{width:28px;height:28px;border-radius:50%;background:#fff;border:4px solid #000}
 #csd{width:100%}
+#cr{position:fixed;inset:0;z-index:42;background:#fff;color:#000;display:none;overflow:hidden;touch-action:manipulation}
+#cr.on{display:block}
+html[data-theme="dark"] #cr{filter:invert(1) hue-rotate(180deg)}
+#crn span{position:absolute;white-space:nowrap;cursor:pointer;transition:opacity .35s,transform .35s;user-select:none;-webkit-user-select:none;will-change:transform}
+#crx{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 12px);z-index:3;font:900 18px system-ui,-apple-system,sans-serif;color:#000;background:#fff;border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:4px 12px}
+#crs{position:absolute;left:50%;bottom:calc(10% + env(safe-area-inset-bottom,0px));width:96px;height:96px;transform:translateX(-50%);z-index:2;pointer-events:none}
+#crs svg{width:100%;height:100%;overflow:visible}
+#crb{position:absolute;left:50%;bottom:calc(100% + 16px);transform:translateX(-50%);width:max-content;max-width:min(300px,86vw);background:#fff;border:3px solid #000;border-radius:18px;box-shadow:4px 4px 0 #000;padding:9px 14px;text-align:center;font:700 15px/1.3 system-ui,-apple-system,sans-serif;animation:crp .3s cubic-bezier(.3,1.7,.5,1)}
+#crb b{display:block;font:900 20px/1.1 system-ui,-apple-system,sans-serif;margin-bottom:2px}
+#crb:after{content:'';position:absolute;left:50%;bottom:-16px;margin-left:-10px;border:10px solid transparent;border-top:14px solid #000;border-bottom:0}
+#crb:before{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-6px;border:6px solid transparent;border-top:10px solid #fff;border-bottom:0;z-index:1}
+@keyframes crp{from{transform:translateX(-50%) scale(.2);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
 </style></head><body>
 <div id="qro"><div id="qrb"><b>Scan to play!</b><canvas id="qrc"></canvas><small>Point a phone camera here and open the link. To keep it as an app, tap Share, then Add to Home Screen.</small><small style="margin-top:8px">Tap anywhere to close</small></div></div>
 <div id="nto"><div id="ntb"><button id="ntx">✕</button><h3>Play a friend</h3><div id="ntm"><button id="nth">Host a game</button><button id="ntj">Join a game</button></div><div id="nthv" style="display:none"><div class="code" id="ntcode"></div><canvas id="ntc"></canvas><small>Your friend scans this, or types the code under Join.</small></div><div id="ntjv" style="display:none"><input id="ntin" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="CODE"><br><button id="ntgo">Join</button></div><div id="nts"></div><button id="ntlv" style="display:none">Leave game</button></div></div>
 <div id="nchip"></div>
 <div id="cfb">✓</div>
-<div id="mnu"><div id="mnb"><h3>Menu</h3><button id="mnR">New game</button><button id="mnD">Dark mode: off</button><button id="mnC">Colors</button><button id="mnF">Move confirm: off</button><button id="mnX">Close</button></div></div>
+<div id="mnu"><div id="mnb"><h3>Menu</h3><button id="mnR">New game</button><button id="mnD">Dark mode: off</button><button id="mnC">Colors</button><button id="mnK">Credits</button><button id="mnF">Move confirm: off</button><button id="mnX">Close</button></div></div>
+<div id="cr"><button id="crx">✕</button><div id="crn"></div><div id="crs"><div id="crb"></div><svg viewBox="-60 -60 120 120"><g id="crr"></g><circle id="crc" r="30" fill="#b4ff00" stroke="#000" stroke-width="3.5"/><ellipse cx="-10" cy="-6" rx="4.2" ry="6.5"/><ellipse cx="10" cy="-6" rx="4.2" ry="6.5"/><circle cx="-11" cy="-9" r="1.6" fill="#fff"/><circle cx="9" cy="-9" r="1.6" fill="#fff"/><path id="crsm" d="M-11 8 Q0 19 11 8" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/><ellipse id="crmo" cx="0" cy="11" rx="7" ry="1" fill="#000" style="display:none"/></svg></div></div>
 <div id="cs"><div id="cst"></div><div id="csp"><div class="row"><button id="csO" class="on">O</button><button id="csX">X</button></div><div class="row"><button id="csP" class="on">Primary</button><button id="csS">Secondary</button></div><label>Hue</label><input type="range" id="csH" min="0" max="360"><label>Saturation</label><input type="range" id="csA" min="0" max="100"><label>Brightness</label><input type="range" id="csL" min="10" max="100"><button id="csd">Done</button></div></div>
-<div id="ver">ver.0.27</div>
+<div id="ver">ver.0.28</div>
 <header><div id="st"></div><div id="sw"></div><button id="rs" aria-label="Restart">↻</button><button id="mu" aria-label="Music" aria-pressed="true">♪</button></header>
 <canvas id="c"></canvas>
 <canvas id="pan" width="440" height="340"></canvas>
@@ -1400,7 +1413,7 @@ function drawQR(c,u){const q=new QRC(-1,1);q.addData(u);q.make();const n=q.getMo
 function showQR(){drawQR(document.getElementById('qrc'),location.href.split('#')[0].split('?')[0]);document.getElementById('qro').classList.add('on')}
 document.getElementById('qro').addEventListener('click',()=>document.getElementById('qro').classList.remove('on'));
 /* ---------- online play (2 phones, PeerJS) ---------- */
-const BUILD='0.27',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
+const BUILD='0.28',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
 const $n=i=>document.getElementById(i),nSt=t=>{$n('nts').textContent=t||''};
 const snap=()=>g.join('')+'|'+mvd+'|'+turn+'|'+pieces.length+'|'+lockT;
 const _pl=place,_df=doFlick,_dr=doRot,_rs=reset,_tc=toggleCpu,_pp=pickPiece;
@@ -1508,6 +1521,25 @@ function csStep(now){const t=now/1000,asp=cv.clientWidth/cv.clientHeight||.5,W=3
  _cv.set(0,.5,0).project(cam2);const up=new THREE.Vector3(0,1,0).applyQuaternion(cam2.quaternion),dv=(_cv.y-.45)*H/2;
  cam2.position.addScaledVector(up,dv);cam2.lookAt(cam2.position.clone().addScaledVector(new THREE.Vector3(0,-Math.sin(e),-Math.cos(e)),30));
  csCh.forEach(c=>{const sel=c.type===csWho;c.ring.visible=sel;c.grp.rotation.y=idle(c.grp,t+c.ph,c.type)-az;c.grp.position.y=sel?Math.abs(Math.sin(t*3))*.05:0;if(!c.bp)c.bp={grp:c.grp,type:c.type};blinkStep(c.bp,performance.now())})}
+
+/* ---------- credits ---------- */
+const CRED=[['pabloKM','Creative director, game designer & concept artist. Dreamed up the tower, drew the characters and steered every decision.'],
+ ['Claude','Engineer & technical artist. Built the 3D world, animation, AI opponents and online play from Pablo’s direction.'],
+ ['Noa','for squashing'],['Andres','for new feature ideas'],['Starky','for demanding difficulty'],['Rosalie','for making mistakes'],['Englebert','for chasing challenges'],['You','for playing!']];
+const SUNC=['#b4ff00','#ff8a1a','#ff4fd8','#35e0ff'];
+let crOn=false,crI=-1,crT=0,crSp=0,crEls=null;
+(()=>{const r=$n('crr');let h='';for(let i=0;i<12;i++){h+='<polygon points="-6,-36 6,-36 0,-52" fill="#fff" stroke="#000" stroke-width="3" stroke-linejoin="round" transform="rotate('+i*30+')"/>'}r.innerHTML=h})();
+function crSay(i,now){crI=i;crT=now;crSp=now+2600;const [n,w]=CRED[i],b=$n('crb');b.style.animation='none';void b.offsetWidth;b.style.animation='';b.innerHTML='<b></b>';b.firstChild.textContent=n;b.append(document.createTextNode(w));$n('crc').setAttribute('fill',SUNC[i%SUNC.length]);crEls.forEach((e,k)=>{e.el.style.opacity=k===i?.95:.2;e.el.style.transform=''})}
+function openCr(){const host=$n('crn');if(!crEls){host.innerHTML='';crEls=CRED.map((c,i)=>{const el=document.createElement('span');el.textContent=c[0];el.style.fontFamily=FONTS[(i*3+1)%FONTS.length];el.style.fontSize=(30+Math.random()*34|0)+'px';if(Math.random()<.35)el.style.fontStyle='italic';el.style.fontWeight=700;el.style.opacity=.2;el.onclick=()=>crSay(i,performance.now());host.append(el);
+  return{el,u:.12+(i%2)*.46+Math.random()*.1,v:.11+(i/2|0)*.145+Math.random()*.03,ph:Math.random()*6.28}})}
+ crOn=true;$n('cr').classList.add('on');crSay(0,performance.now())}
+function crStep(now){const t=now/1000,W=innerWidth,H=innerHeight;
+ crEls.forEach((e,k)=>{const x=Math.max(8,Math.min(W-e.el.offsetWidth*1.25-8,e.u*W+Math.sin(t*.45+e.ph)*16)),y=e.v*H+Math.cos(t*.35+e.ph*1.3)*14,s=k===crI?1.25:1;e.el.style.left=x+'px';e.el.style.top=y+'px';e.el.style.transform='scale('+s+') rotate('+Math.sin(t*.3+e.ph)*4+'deg)'});
+ $n('crr').setAttribute('transform','rotate('+(t*14)%360+')');
+ const talk=now<crSp;$n('crsm').style.display=talk?'none':'';const mo=$n('crmo');mo.style.display=talk?'':'none';if(talk)mo.setAttribute('ry',2+Math.abs(Math.sin(t*14))*6);
+ if(now-crT>4200)crSay((crI+1)%CRED.length,now)}
+$n('crx').onclick=()=>{crOn=false;$n('cr').classList.remove('on')};
+$n('mnK').onclick=()=>{closeMn();openCr()};
 /* self-update: compare the live build number with this one and reload if stale */
 addEventListener('load',()=>{if(location.protocol==='file:'||/[?&]v=/.test(location.search))return;
  fetch(location.pathname,{cache:'no-store'}).then(async r=>{const rd=r.body.getReader(),td=new TextDecoder();let t='';
@@ -2076,7 +2108,7 @@ function frame(now){if(intro===0)placeVer();netPump();requestAnimationFrame(fram
  if(mn)posMenu();
  stars.forEach(sp=>{const u=sp.userData,t=(now-u.t0)/1000,e=eob(Math.min(1,t/.5));sp.position.set(u.u*(fw/2)/camZ+Math.sin(now/1700+u.ph)*.12,u.v*(fh/2)/camZ+Math.cos(now/1300+u.ph)*.12,-60);sp.scale.setScalar(u.sz*e*(1+.12*Math.sin(now/400+u.ph))/camZ);sp.material.rotation=Math.sin(now/2000+u.ph)*.3;sp.material.color.set(TH[th].R)});
  for(let i=fx.length-1;i>=0;i--){const f=fx[i],k=(now-f.t0)/f.d;if(k>=1){f.kill();fx.splice(i,1)}else if(k>=0)f.upd(k)}
- if(csOn){csStep(now);rend.render(scene2,cam2)}else rend.render(scene,cam);
+ if(crOn)crStep(performance.now());if(csOn){csStep(now);rend.render(scene2,cam2)}else rend.render(scene,cam);
  let s;if(!over)s=`<b>${turn?'X':'O'}’s turn</b><small>hold a panel, let go to place</small>`;
  else if(!fin)s=last;else s=`<b>${win?(g[win[0]]==1?'O':'X')+' wins!':'Draw'}</b><small>tap ↻ to play again</small>`;
  if(s!==last){last=s;st.innerHTML=s}}
