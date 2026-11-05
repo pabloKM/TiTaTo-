@@ -223,7 +223,7 @@ function doFlick(p,dir){const now=performance.now();
  for(let i=0;i<mv.length-1;i++)bang(wpf(mv[i][0]).add(wpf(mv[i+1][0])).multiplyScalar(.5).add(new THREE.Vector3(0,.75,0)),fl[i].pre+fl[i].mv*.3+i*80);
  lockT=now+Math.max(...fl.map(f=>f.d))+mv.length*80+200;setA(null);scoreCheck();mvd=true}
 function flyStep(p,now,tt){const f=p.fly,g=p.grp,s0=f.s0,yI=idle(g,tt,p.type),sl=1;
- const eym=g.userData.all[3];if((f.kind==='roll'||f.kind==='shove')&&!f.cl&&now>=f.t0-200){f.cl=1;eym.map=eyesTex(p.type,'c');eym.needsUpdate=true}if(f.angry&&!f.ang){f.ang=1;eym.map=eyesTex(p.type,1);eym.needsUpdate=true}
+ const eym=g.userData.all[3];if((f.kind==='roll'||f.kind==='shove'||f.beam)&&!f.cl&&now>=f.t0-200){f.cl=1;eym.map=eyesTex(p.type,'c');eym.needsUpdate=true}if(f.angry&&!f.ang){f.ang=1;eym.map=eyesTex(p.type,1);eym.needsUpdate=true}
  if(now>=f.t0)f.el=(f.el||0)+FD*1000*sl;
  const t=f.el||0,pre=f.pre,mT=f.mv,post=f.post,kP=pre?Math.min(1,t/pre):1,kM=Math.min(1,Math.max(0,(t-pre)/mT)),kO=post?Math.min(1,Math.max(0,(t-pre-mT)/post)):0,yT=Math.atan2(f.dx,f.dz),P=g.position;
  let yaw=f.face?(t<pre?la(yI,yT,eo(kP)):yT):yI,sy=1,sw=1,pitch=0,tum=null,rq=null,lr=0;const cr=f.first?(t<pre?eo(kP):Math.max(0,1-kM*6)):0;
@@ -424,12 +424,12 @@ function doScore(){const ws=pend;pend=null;scoring=true;const t0=scoreT0=perform
    if(b&&b.d<1.5){const ax=P.x-b.Q.x,zz=P.z-b.Q.z,l=Math.hypot(ax,zz)||1;near.push({p,ax:ax/l,az:zz/l,u:b.u})}});
  {const pc={};pieces.forEach(q=>{if(!q.fly&&q.done)pc[q.a]=q});const G2=g.slice(),used=new Set(),nw=performance.now(),wc=c=>new THREE.Vector3((c%3)-1,B+T+(c/9|0)*SY+.12,((c/3|0)%3)-1);let any=false;
   near.forEach(n=>{const di=Math.abs(n.ax)>=Math.abs(n.az)?Math.sign(n.ax):0,dj=di?0:Math.sign(n.az);if(!di&&!dj)return;
-   const ch=[];let i=n.p.a%3,j=(n.p.a/3|0)%3;const k=n.p.a/9|0;let ok=true;
-   for(;;){const c=i+3*j+9*k;if(!G2[c])break;const q=pc[c];if(cells.has(c)||!q||used.has(q)){ok=false;break}ch.push(c);i+=di;j+=dj;if(i<0||i>2||j<0||j>2){ok=false;break}}
+   const ch=[];let i=n.p.a%3,j=(n.p.a/3|0)%3;const k=n.p.a/9|0;let ok=true,off=false;
+   for(;;){const c=i+3*j+9*k;if(!G2[c])break;const q=pc[c];if(cells.has(c)||!q||used.has(q)){ok=false;break}ch.push(c);i+=di;j+=dj;if(i<0||i>2||j<0||j>2){off=true;break}}
    if(!ok||!ch.length)return;any=true;const t1=t0+950+300*n.u+100,moved=[];
-   for(let x=ch.length-1;x>=0;x--){const from=ch[x],to=from+di+3*dj,q=pc[from];G2[to]=G2[from];G2[from]=0;delete pc[from];pc[to]=q;used.add(q);moved[x]={q,from,to}}
-   moved.forEach(({q,from,to},x)=>{const f={t0:t1+x*70,kind:x?'shove':'roll',x0:q.x,z0:q.z,y0:q.Y,s0:q.grp.scale.clone(),dx:di,dz:dj,first:false,face:false,pre:0,mv:x?420:640,post:x?150:260,y1:q.Y};f.d=f.pre+f.mv+f.post;
-    q.a=to;q.x=(to%3)-1;q.z=((to/3|0)%3)-1;q.fly=f;const a0=wc(from),b0=wc(to);
+   for(let x=ch.length-1;x>=0;x--){const from=ch[x],to=(off&&x===ch.length-1)?-1:from+di+3*dj,q=pc[from];if(to>=0)G2[to]=G2[from];G2[from]=0;delete pc[from];if(to>=0)pc[to]=q;used.add(q);moved[x]={q,from,to}}
+   moved.forEach(({q,from,to},x)=>{const fl=to<0,f={t0:t1+x*70,kind:fl?'fall':x?'shove':'roll',x0:q.x,z0:q.z,y0:q.Y,s0:q.grp.scale.clone(),dx:di,dz:dj,first:false,face:false,beam:true,pre:0,mv:fl?1100:x?420:640,post:fl?0:x?150:260,y1:q.Y};f.d=f.pre+f.mv+f.post;
+    if(!fl){q.a=to;q.x=(to%3)-1;q.z=((to/3|0)%3)-1}q.fly=f;if(fl)return;const a0=wc(from),b0=wc(to);
     for(let m=0;m<(x?4:6);m++)dust(a0.clone().lerp(b0,m/(x?3.2:4.5)),f.t0-nw+f.mv*m*.2,x?.55:.7)})});
   if(any)for(let c=0;c<27;c++)g[c]=G2[c]}
  const GY=new THREE.Color(0xffe14a),GY2=new THREE.Color(0xffb300),
