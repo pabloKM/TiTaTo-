@@ -89,11 +89,12 @@ function iconTex(kind){const c=document.createElement('canvas');c.width=c.height
  x.strokeStyle=x.fillStyle=kind==='c'?'#fff':'#000';x.lineWidth=7;x.lineCap=x.lineJoin='round';x.beginPath();x.arc(64,64,56,0,7);x.stroke();
  if(kind==='m'){x.beginPath();x.ellipse(52,86,14,10,-.4,0,7);x.fill();x.beginPath();x.moveTo(64,84);x.lineTo(64,36);x.quadraticCurveTo(70,52,86,58);x.stroke()}
  else if(kind==='c'){x.beginPath();x.roundRect(28,46,50,36,8);x.stroke();x.beginPath();x.moveTo(80,64);x.lineTo(100,48);x.lineTo(100,80);x.closePath();x.stroke()}
+ else if(kind==='d'){x.beginPath();x.arc(64,64,30,0,7);x.stroke();x.beginPath();x.arc(64,64,30,PI/2,PI*1.5);x.closePath();x.fill()}
  else{x.beginPath();x.arc(64,64,26,-.6,4.6);x.stroke();x.beginPath();x.moveTo(55,27);x.lineTo(67,38);x.lineTo(55,49);x.stroke()}
  return new THREE.CanvasTexture(c)}
 function addBtn(kind,z,ry,fn){const m=new THREE.Mesh(new THREE.PlaneGeometry(.9,.9),new THREE.MeshBasicMaterial({map:iconTex(kind),transparent:true,depthWrite:false}));
  m.position.set(0,.1,z);m.rotation.y=ry;m.renderOrder=2;m.userData.fn=fn;head.add(m);btns.push(m);return m}
-const btnMusic=addBtn('m',1.53,0,()=>toggleMusic());addBtn('r',-1.53,PI,()=>reset());
+const btnMusic=addBtn('m',1.53,0,()=>toggleMusic());const rstB=addBtn('r',-1.53,PI,()=>reset());rstB.position.x=-.55;const drkB=addBtn('d',-1.53,PI,()=>setDark(!DARK));drkB.position.x=.55;
 const camBtn=addBtn('c',0,-PI/2,()=>{orbit=!orbit;camBtn.material.opacity=orbit?1:.55});camBtn.position.set(-1.53,.1,0);camBtn.material.opacity=.55;
 const bt={};
 /* ---------- paddles held by the building ---------- */
@@ -562,7 +563,7 @@ function eyesTex(type,ang){const cls=ang==='c',key=(DARK?'d':'')+type+(cls?'c':a
   x.fillStyle='#000';x.beginPath();x.arc(cx+(ang?(i?-8:8):12),h/2+(ang?14:7),type?21:19,0,7);x.fill();
   if(ang){const sg=i?-1:1;x.lineWidth=16;x.beginPath();x.moveTo(cx-sg*54,h/2-ry-6);x.lineTo(cx+sg*46,h/2-ry*.25);x.stroke();x.lineWidth=9}});
  if(DARK){const id=x.getImageData(0,0,256,h),d=id.data;for(let i=0;i<d.length;i+=4){d[i]=255-d[i];d[i+1]=255-d[i+1];d[i+2]=255-d[i+2]}x.putImageData(id,0,0)}return eyeC[key]=new THREE.CanvasTexture(c)}
-function setDark(on){DARK=on;if(on)document.documentElement.setAttribute('data-theme','dark');
+function setDark(on){DARK=on;if(on)document.documentElement.setAttribute('data-theme','dark');else document.documentElement.removeAttribute('data-theme');
  [...ghosts.map((x,i)=>({grp:x,type:i})),...pieces].forEach(p=>{const m=p.grp.userData.all&&p.grp.userData.all[3];if(m&&m.map){m.map=eyesTex(p.type);m.needsUpdate=true}})}
 function limbG(a,b,r,mat,par,ol,endM,endS){const g=new THREE.Group();g.position.set(...a);par.add(g);const v=new THREE.Vector3(b[0]-a[0],b[1]-a[1],b[2]-a[2]),len=v.length();
  const m=mk(new THREE.CylinderGeometry(r,r,len,6),mat,g,[v.x/2,v.y/2,v.z/2],null,ol,1.7);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),v.clone().normalize());
