@@ -261,7 +261,7 @@ function posEval(G,me){const op=3-me;let s=0,mc=0,oc=0;for(let i=0;i<27;i++){if(
  const tm=new Int8Array(27),to=new Int8Array(27);
  for(let n=0;n<LINES.length;n++){const L=LINES[n];let x=0,o=0,e=-1;for(let q=0;q<3;q++){const v=G[L[q]];if(v===me)x++;else if(v===op)o++;else e=L[q]}
   if(x===2&&o===0){s+=45;tm[e]++}else if(o===2&&x===0){s-=75;to[e]++}else if(x===1&&o===0)s+=3;else if(o===1&&x===0)s-=3}
- for(let c=0;c<27;c++){if(tm[c]>1)s+=230*(tm[c]-1);if(to[c]>1)s-=280*(to[c]-1)}
+ for(let c=0;c<27;c++){if(tm[c]>1)s+=520*(tm[c]-1);if(to[c]>1)s-=420*(to[c]-1)}
  if(G[13]===me)s+=10;else if(G[13]===op)s-=10;return s}
 function genMoves(G,who,pm){const out=[];
  for(let a=0;a<27;a++)if(G[a]===who&&(!pm||pm[a]))DIRS.forEach(d=>{const mv=planMove(G,a,d);if(!mv.length)return;if(pm&&(mv.some(m=>!pm[m[0]])||isBlocked(mv,pm,pm[a])))return;out.push({mv,k:'f',a,d})});
@@ -275,14 +275,18 @@ function simTurn(G,me,moves,lite){const op=3-me,res=[];
    if(lite)sc=pp*600+(mc-oc+1)*16;else{const G2=G1.slice();ws.forEach(L=>L.forEach(i=>{G2[i]=0}));sc=pp*600+posEval(G2,me)-(M?4:0)}
    res.push({sc,M,a});G1[a]=0}}
  return res}
-function aiMove(){const me=turn+1,op=3-me,pm={};pieces.forEach(q=>{if(!q.fly&&q.done&&!q.sc)pm[q.a]=q});
- const moves=mvd?[null]:[null].concat(genMoves(g,me,pm)),cands=simTurn(g,me,moves,false);if(!cands.length)return;
+function boardAfter(G,who,M,a){const G1=M?applyPlan(G,M.mv):G.slice();clearL(G1);if(a>=0){G1[a]=who;clearL(G1)}return G1}
+function aiPick(G,me,moves){const op=3-me,cands=simTurn(G,me,moves,false);if(!cands.length)return null;
  cands.sort((x,y)=>y.sc-x.sc);const top=cands.slice(0,14);
- top.forEach(c=>{const G1=c.M?applyPlan(g,c.M.mv):g.slice();clearL(G1);if(c.a>=0){G1[c.a]=me;clearL(G1)}
-  let best=-1e9;simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).forEach(r=>{if(r.sc>best)best=r.sc});
-  c.f=c.sc-.85*(best>-1e8?best:0)+Math.random()*1.5});
- top.sort((x,y)=>y.f-x.f);const c=top[0];aiNow=true;
- try{if(c.M){c.M.k==='f'?doFlick(pm[c.M.a],c.M.d):doRot(c.M.kk,c.M.dr);if(!mvd){const pl=top.find(z=>!z.M&&z.a>=0);if(pl){setA(pl.a);place()}}}
+ top.forEach(c=>{const G1=boardAfter(G,me,c.M,c.a);let best=-1e9;simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).forEach(r=>{if(r.sc>best)best=r.sc});c.R=best>-1e8?best:0;c.f=c.sc-.85*c.R});
+ top.sort((x,y)=>y.f-x.f);
+ top.slice(0,6).forEach(c=>{const G1=boardAfter(G,me,c.M,c.a),rep=simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).sort((x,y)=>y.sc-x.sc).slice(0,4);let worst=1e9;
+  rep.forEach(r=>{const G2=boardAfter(G1,op,r.M,r.a);let v=-1e9;simTurn(G2,me,[null].concat(genMoves(G2,me,null)),true).forEach(q=>{if(q.sc>v)v=q.sc});if(v<-1e8)v=0;const w=-r.sc*.85+.6*v;if(w<worst)worst=w});
+  c.f=c.sc+(worst<1e8?worst:0)+Math.random()*1.5});
+ top.sort((x,y)=>y.f-x.f);return top[0]}
+function aiMove(){const me=turn+1,pm={};pieces.forEach(q=>{if(!q.fly&&q.done&&!q.sc)pm[q.a]=q});
+ const c=aiPick(g,me,mvd?[null]:[null].concat(genMoves(g,me,pm)));if(!c)return;aiNow=true;
+ try{if(c.M){c.M.k==='f'?doFlick(pm[c.M.a],c.M.d):doRot(c.M.kk,c.M.dr);if(!mvd){const pl=aiPick(g,me,[null]);if(pl&&pl.a>=0){setA(pl.a);place()}}}
   else if(c.a>=0){setA(c.a);place()}}catch(e){}
  aiNow=false}
 const RING=[[2,1],[2,2],[1,2],[0,2],[0,1],[0,0],[1,0],[2,0]];
