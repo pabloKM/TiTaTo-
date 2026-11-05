@@ -261,7 +261,7 @@ function posEval(G,me){const op=3-me;let s=0,mc=0,oc=0;for(let i=0;i<27;i++){if(
  const tm=new Int8Array(27),to=new Int8Array(27);
  for(let n=0;n<LINES.length;n++){const L=LINES[n];let x=0,o=0,e=-1;for(let q=0;q<3;q++){const v=G[L[q]];if(v===me)x++;else if(v===op)o++;else e=L[q]}
   if(x===2&&o===0){s+=45;tm[e]++}else if(o===2&&x===0){s-=75;to[e]++}else if(x===1&&o===0)s+=3;else if(o===1&&x===0)s-=3}
- for(let c=0;c<27;c++){if(tm[c]>1)s+=520*(tm[c]-1);if(to[c]>1)s-=420*(to[c]-1)}
+ for(let c=0;c<27;c++){if(tm[c]>1)s+=AI_FW*(tm[c]-1);if(to[c]>1)s-=AI_FW*.8*(to[c]-1)}
  if(G[13]===me)s+=10;else if(G[13]===op)s-=10;return s}
 function genMoves(G,who,pm){const out=[];
  for(let a=0;a<27;a++)if(G[a]===who&&(!pm||pm[a]))DIRS.forEach(d=>{const mv=planMove(G,a,d);if(!mv.length)return;if(pm&&(mv.some(m=>!pm[m[0]])||isBlocked(mv,pm,pm[a])))return;out.push({mv,k:'f',a,d})});
@@ -275,13 +275,15 @@ function simTurn(G,me,moves,lite){const op=3-me,res=[];
    if(lite)sc=pp*600+(mc-oc+1)*16;else{const G2=G1.slice();ws.forEach(L=>L.forEach(i=>{G2[i]=0}));sc=pp*600+posEval(G2,me)-(M?4:0)}
    res.push({sc,M,a});G1[a]=0}}
  return res}
+let AI_DEPTH=3,AI_FW=230;
 function boardAfter(G,who,M,a){const G1=M?applyPlan(G,M.mv):G.slice();clearL(G1);if(a>=0){G1[a]=who;clearL(G1)}return G1}
 function aiPick(G,me,moves){const op=3-me,cands=simTurn(G,me,moves,false);if(!cands.length)return null;
  cands.sort((x,y)=>y.sc-x.sc);const top=cands.slice(0,14);
  top.forEach(c=>{const G1=boardAfter(G,me,c.M,c.a);let best=-1e9;simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).forEach(r=>{if(r.sc>best)best=r.sc});c.R=best>-1e8?best:0;c.f=c.sc-.85*c.R});
  top.sort((x,y)=>y.f-x.f);
- top.slice(0,6).forEach(c=>{const G1=boardAfter(G,me,c.M,c.a),rep=simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).sort((x,y)=>y.sc-x.sc).slice(0,4);let worst=1e9;
-  rep.forEach(r=>{const G2=boardAfter(G1,op,r.M,r.a);let v=-1e9;simTurn(G2,me,[null].concat(genMoves(G2,me,null)),true).forEach(q=>{if(q.sc>v)v=q.sc});if(v<-1e8)v=0;const w=-r.sc*.85+.6*v;if(w<worst)worst=w});
+ if(AI_DEPTH>=3)top.slice(0,6).forEach(c=>{const G1=boardAfter(G,me,c.M,c.a),all=simTurn(G1,op,[null].concat(genMoves(G1,op,null)),true).sort((x,y)=>y.sc-x.sc),hot=[];for(let h=0;h<27;h++)if(!G1[h]){G1[h]=me;if(LA[h].some(L=>G1[L[0]]&&G1[L[0]]===G1[L[1]]&&G1[L[1]]===G1[L[2]]))hot.push(h);G1[h]=0}
+  const rep=all.slice(0,4).concat(hot.map(h=>all.find(r=>r.a===h&&!r.M)).filter(Boolean));let worst=1e9;
+  rep.forEach(r=>{const G2=boardAfter(G1,op,r.M,r.a);let v=-1e9;simTurn(G2,me,[null].concat(genMoves(G2,me,null)),true).forEach(q=>{if(q.sc>v)v=q.sc});if(v<-1e8)v=0;const w=-r.sc*.85+.35*v;if(w<worst)worst=w});
   c.f=c.sc+(worst<1e8?worst:0)+Math.random()*1.5});
  top.sort((x,y)=>y.f-x.f);return top[0]}
 function aiMove(){const me=turn+1,pm={};pieces.forEach(q=>{if(!q.fly&&q.done&&!q.sc)pm[q.a]=q});
@@ -523,7 +525,7 @@ function cineStep(rn,dt){const act=pieces.filter(p=>p.fly&&performance.now()>=p.
 const tsS=document.createElement('style');tsS.textContent='#ts{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0;transition:opacity .9s}#ts.on{opacity:1}#ts i{position:absolute;left:0;right:0;-webkit-backdrop-filter:blur(var(--b,7px));backdrop-filter:blur(var(--b,7px))}#ts i:first-child{top:0;height:var(--t,25%);-webkit-mask-image:linear-gradient(#000 25%,transparent);mask-image:linear-gradient(#000 25%,transparent)}#ts i:last-child{bottom:0;height:var(--u,25%);-webkit-mask-image:linear-gradient(transparent,#000 75%);mask-image:linear-gradient(transparent,#000 75%)}';document.head.append(tsS);
 const tsE=document.createElement('div');tsE.id='ts';tsE.innerHTML='<i></i><i></i>';document.body.append(tsE);let tsT=.25,tsU=.25;
 function tsOn(on){tsE.classList.toggle('on',on)}
-function tsStep(dt){const v=camTgt.clone().project(cam),fy=Math.min(.62,Math.max(.38,-v.y*.5+.5)),h=.16,k=Math.min(1,dt*3);tsT+=(Math.max(.07,fy-h)-tsT)*k;tsU+=(Math.max(.07,1-fy-h)-tsU)*k;
+function tsStep(dt){const v=camTgt.clone().project(cam);if(!isFinite(v.y))return;const fy=Math.min(.62,Math.max(.38,-v.y*.5+.5)),h=.16,k=Math.min(1,dt*3);tsT+=(Math.max(.07,fy-h)-tsT)*k;tsU+=(Math.max(.07,1-fy-h)-tsU)*k;
  tsE.style.setProperty('--t',(tsT*100).toFixed(1)+'%');tsE.style.setProperty('--u',(tsU*100).toFixed(1)+'%');tsE.style.setProperty('--b',Math.max(5,Math.min(10,innerHeight*.011)).toFixed(1)+'px')}
 function backStep(dt){const k=1-Math.exp(-4*dt),v0=new THREE.Vector3(0,ty0,0);az+=wr(cSave.az-az)*k;el+=(cSave.el-el)*k;camTgt.lerp(v0,k);camZ+=(1-camZ)*k;updCam();
  if(Math.abs(wr(cSave.az-az))<.01&&Math.abs(cSave.el-el)<.01&&Math.abs(1-camZ)<.01&&camTgt.distanceTo(v0)<.03){az=cSave.az;el=cSave.el;camZ=1;camTgt.copy(v0);camBack=false;updCam()}}
