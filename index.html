@@ -44,9 +44,23 @@ html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 #qrb canvas#qrc{position:static;width:100%;height:auto;display:block;image-rendering:pixelated;margin:8px 0 10px}
 #qrb small{display:block;font:600 13px/1.35 system-ui,-apple-system,sans-serif;opacity:.8}
 #qrb b{display:block;font-size:20px}
+#nto{position:fixed;inset:0;z-index:41;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+#nto.on{display:flex}
+#ntb{background:#fff;color:#000;border:4px solid #000;border-radius:22px;box-shadow:6px 6px 0 #000;padding:16px;max-width:340px;width:100%;text-align:center;font:800 16px/1.25 system-ui,-apple-system,sans-serif;position:relative}
+#ntb h3{margin:0 0 10px;font:900 22px/1 system-ui,-apple-system,sans-serif}
+#ntb button{font:900 17px system-ui,-apple-system,sans-serif;color:#000;background:#fff;border:3px solid #000;border-radius:14px;box-shadow:3px 3px 0 #000;padding:10px 14px;margin:4px;touch-action:manipulation}
+#ntb button:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #000}
+#ntb input{font:900 30px system-ui,-apple-system,sans-serif;text-transform:uppercase;text-align:center;letter-spacing:8px;width:7em;max-width:100%;border:3px solid #000;border-radius:12px;padding:8px;margin:6px 0;box-sizing:border-box;color:#000;background:#fff}
+#ntb .code{font:900 44px/1 system-ui,-apple-system,sans-serif;letter-spacing:10px;margin:6px 0}
+#ntb canvas#ntc{position:static;width:60%;height:auto;display:block;image-rendering:pixelated;margin:4px auto}
+#nts{font:700 14px/1.3 system-ui,-apple-system,sans-serif;min-height:1.3em;margin-top:6px}
+#ntx{position:absolute;right:8px;top:8px;padding:2px 10px!important;margin:0!important}
+#nchip{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 6px);z-index:30;display:none;background:#fff;color:#000;border:2px solid #000;border-radius:12px;padding:3px 10px;font:900 12px/1 system-ui,-apple-system,sans-serif;box-shadow:2px 2px 0 #000;pointer-events:none}
 </style></head><body>
 <div id="qro"><div id="qrb"><b>Scan to play!</b><canvas id="qrc"></canvas><small>Point a phone camera here and open the link. To keep it as an app, tap Share, then Add to Home Screen.</small><small style="margin-top:8px">Tap anywhere to close</small></div></div>
-<div id="ver">ver.0.24</div>
+<div id="nto"><div id="ntb"><button id="ntx">✕</button><h3>Play a friend</h3><div id="ntm"><button id="nth">Host a game</button><button id="ntj">Join a game</button></div><div id="nthv" style="display:none"><div class="code" id="ntcode"></div><canvas id="ntc"></canvas><small>Your friend scans this, or types the code under Join.</small></div><div id="ntjv" style="display:none"><input id="ntin" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="CODE"><br><button id="ntgo">Join</button></div><div id="nts"></div><button id="ntlv" style="display:none">Leave game</button></div></div>
+<div id="nchip"></div>
+<div id="ver">ver.0.25</div>
 <header><div id="st"></div><div id="sw"></div><button id="rs" aria-label="Restart">↻</button><button id="mu" aria-label="Music" aria-pressed="true">♪</button></header>
 <canvas id="c"></canvas>
 <canvas id="pan" width="440" height="340"></canvas>
@@ -1350,14 +1364,70 @@ function iconTex(kind){const c=document.createElement('canvas');c.width=c.height
  if(kind==='m'){x.beginPath();x.ellipse(52,86,14,10,-.4,0,7);x.fill();x.beginPath();x.moveTo(64,84);x.lineTo(64,36);x.quadraticCurveTo(70,52,86,58);x.stroke()}
  else if(kind==='c'){x.beginPath();x.roundRect(28,46,50,36,8);x.stroke();x.beginPath();x.moveTo(80,64);x.lineTo(100,48);x.lineTo(100,80);x.closePath();x.stroke()}
  else if(kind==='d'){x.beginPath();x.arc(64,64,30,0,7);x.stroke();x.beginPath();x.arc(64,64,30,PI/2,PI*1.5);x.closePath();x.fill()}
+ else if(kind==='n'){x.lineWidth=6;x.strokeRect(34,30,34,58);x.strokeRect(60,44,34,58);x.fillRect(47,76,8,8);x.fillRect(73,90,8,8)}
  else if(kind==='q'){[[40,40],[76,40],[40,76]].forEach(p=>x.strokeRect(p[0],p[1],14,14));x.fillRect(45,45,4,4);x.fillRect(81,45,4,4);x.fillRect(45,81,4,4);x.fillRect(76,76,10,10);x.fillRect(92,92,6,6);x.fillRect(76,95,6,6);x.fillRect(95,76,6,6)}
  else{x.beginPath();x.arc(64,64,26,-.6,4.6);x.stroke();x.beginPath();x.moveTo(55,27);x.lineTo(67,38);x.lineTo(55,49);x.stroke()}
  return new THREE.CanvasTexture(c)}
 function addBtn(kind,z,ry,fn){const m=new THREE.Mesh(new THREE.PlaneGeometry(.9,.9),new THREE.MeshBasicMaterial({map:iconTex(kind),transparent:true,depthWrite:false}));
  m.position.set(0,.1,z);m.rotation.y=ry;m.renderOrder=2;m.userData.fn=fn;head.add(m);btns.push(m);return m}
-const btnMusic=addBtn('m',1.53,0,()=>toggleMusic());const rstB=addBtn('r',-1.53,PI,()=>reset());rstB.position.x=-.95;const drkB=addBtn('d',-1.53,PI,()=>setDark(!DARK));drkB.position.x=0;const qrB=addBtn('q',-1.53,PI,()=>showQR());qrB.position.x=.95;
-function showQR(){const u=location.href.split('#')[0].split('?')[0],q=new QRC(-1,1);q.addData(u);q.make();const n=q.getModuleCount(),k=8,pad=4,c=document.getElementById('qrc'),x=c.getContext('2d');c.width=c.height=(n+pad*2)*k;x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';for(let r=0;r<n;r++)for(let l=0;l<n;l++)if(q.modules[r][l])x.fillRect((l+pad)*k,(r+pad)*k,k,k);document.getElementById('qro').classList.add('on')}
+const btnMusic=addBtn('m',1.53,0,()=>toggleMusic());btnMusic.position.x=-.55;const netB=addBtn('n',1.53,0,()=>openNet());netB.position.x=.55;const rstB=addBtn('r',-1.53,PI,()=>reset());rstB.position.x=-.95;const drkB=addBtn('d',-1.53,PI,()=>setDark(!DARK));drkB.position.x=0;const qrB=addBtn('q',-1.53,PI,()=>showQR());qrB.position.x=.95;
+function drawQR(c,u){const q=new QRC(-1,1);q.addData(u);q.make();const n=q.getModuleCount(),k=8,pad=4,x=c.getContext('2d');c.width=c.height=(n+pad*2)*k;x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';for(let r=0;r<n;r++)for(let l=0;l<n;l++)if(q.modules[r][l])x.fillRect((l+pad)*k,(r+pad)*k,k,k)}
+function showQR(){drawQR(document.getElementById('qrc'),location.href.split('#')[0].split('?')[0]);document.getElementById('qro').classList.add('on')}
 document.getElementById('qro').addEventListener('click',()=>document.getElementById('qro').classList.remove('on'));
+/* ---------- online play (2 phones, PeerJS) ---------- */
+const BUILD='0.25',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
+const $n=i=>document.getElementById(i),nSt=t=>{$n('nts').textContent=t||''};
+const snap=()=>g.join('')+'|'+mvd+'|'+turn+'|'+pieces.length+'|'+lockT;
+const _pl=place,_df=doFlick,_dr=doRot,_rs=reset,_tc=toggleCpu,_pp=pickPiece;
+const nSend=o=>{try{net.conn&&net.conn.open&&net.conn.send(o)}catch(e){}};
+place=function(){if(net.on&&!net.inn&&turn!==net.me)return;const a=aim,s0=snap();_pl();if(net.on&&!net.inn&&a!=null&&snap()!==s0)nSend({t:'p',a})};
+doFlick=function(p,d){if(net.on&&!net.inn&&turn!==net.me)return;const a=p.a,s0=snap();_df(p,d);if(net.on&&!net.inn&&snap()!==s0)nSend({t:'f',a,d})};
+doRot=function(k,d){if(net.on&&!net.inn&&turn!==net.me)return;const s0=snap();_dr(k,d);if(net.on&&!net.inn&&snap()!==s0)nSend({t:'r',k,d})};
+reset=function(){_rs();if(net.on&&!net.inn){nSend({t:'x'});netUi()}};
+toggleCpu=function(i){if(net.on)return;_tc(i)};
+pickPiece=function(cx,cy){if(net.on&&turn!==net.me)return null;return _pp(cx,cy)};
+function netUi(){const c=$n('nchip');if(net.on){c.style.display='block';c.textContent='ONLINE · you are '+(net.me?'X':'O')+' · '+(turn===net.me?'your turn':"friend's turn")}else c.style.display='none'}
+setInterval(netUi,400);
+function netApply(m){const now=performance.now();
+ if(m.t==='x'){net.inn=true;try{_rs()}finally{net.inn=false}return true}
+ if(!(intro===2&&!over&&!pend&&!scoring&&now>=lockT))return false;
+ const s0=snap();net.inn=true;
+ try{if(m.t==='p'){setA(m.a);_pl()}
+  else if(m.t==='f'){const q=pieces.find(q=>q.a===m.a&&q.done&&!q.fly);if(q)_df(q,m.d)}
+  else if(m.t==='r'){_dr(m.k,m.d)}}
+ finally{net.inn=false}
+ return snap()!==s0}
+let netTry=0;
+function netPump(){if(!net.on)return;
+ if(net.start){if(intro!==2)return;net.start=false;cpuF[0]=cpuF[1]=false;net.inn=true;try{_rs()}finally{net.inn=false}netUi();return}
+ if(!net.q.length){netTry=0;return}
+ if(netApply(net.q[0])){net.q.shift();netTry=0}else if(++netTry>900){net.q.shift();netTry=0;nSt('Out of sync - tap reset')}}
+function netEnd(msg){net.on=false;net.q.length=0;try{net.conn&&net.conn.close()}catch(e){}try{net.peer&&net.peer.destroy()}catch(e){}net.conn=net.peer=null;netUi();$n('ntlv').style.display='none';nSt(msg||'')}
+function netOpen(conn,me){net.conn=conn;net.me=me;
+ conn.on('open',()=>{conn.send({t:'hi',v:BUILD})});
+ conn.on('data',m=>{if(m.t==='hi'){if(m.v!==BUILD){nSt('Other phone is on ver.0.'+m.v.slice(2)+' and this one is ver.'+BUILD+'. Both need the same build.');netEnd('Other phone is on ver.'+m.v+' and this one is ver.'+BUILD+'. Both need the same build - reload both.');return}
+   net.on=true;net.q.length=0;net.start=true;$n('nthv').style.display=$n('ntjv').style.display='none';$n('ntm').style.display='none';$n('ntlv').style.display='';nSt('Connected! You are '+(me?'X (second)':'O (first)')+'.');if(intro===0)startIntro();setTimeout(()=>$n('nto').classList.remove('on'),1200)}
+  else net.q.push(m)});
+ conn.on('close',()=>{if(net.on){netEnd('Friend disconnected. You can keep playing here.');$n('ntm').style.display=''}});
+ conn.on('error',()=>nSt('Connection problem.'))}
+function loadPeer(cb){if(window.Peer)return cb();const u=['https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js','https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js'];let i=0;const t=()=>{if(i>=u.length){nSt('Could not load online play. Check your internet.');return}const sc=document.createElement('script');sc.src=u[i++];sc.onload=cb;sc.onerror=()=>{sc.remove();t()};document.head.append(sc)};t()}
+const ALPH='ABCDEFGHJKLMNPQRSTUVWXYZ',rcode=()=>Array.from({length:4},()=>ALPH[Math.random()*ALPH.length|0]).join('');
+function netHost(){nSt('Starting...');loadPeer(()=>{let tries=0;const go=()=>{const code=rcode();const pr=new Peer('tttower-'+code);net.peer=pr;
+  pr.on('open',()=>{$n('ntm').style.display='none';$n('nthv').style.display='';$n('ntcode').textContent=code;drawQR($n('ntc'),location.href.split('#')[0].split('?')[0]+'#join='+code);nSt('Waiting for your friend...')});
+  pr.on('connection',c=>{if(net.conn)return c.close();netOpen(c,0)});
+  pr.on('error',e=>{if(e.type==='unavailable-id'&&tries++<5){try{pr.destroy()}catch(_){}go()}else nSt('Could not start: '+(e.type||'error'))})};go()})}
+function netJoin(code){code=(code||'').toUpperCase().trim();if(code.length!==4){nSt('Enter the 4-letter code.');return}nSt('Connecting...');
+ loadPeer(()=>{const pr=new Peer();net.peer=pr;let to=setTimeout(()=>nSt("Couldn't connect. Check the code, or try the same Wi-Fi."),15000);
+  pr.on('open',()=>{const c=pr.connect('tttower-'+code,{reliable:true});netOpen(c,1);c.on('open',()=>clearTimeout(to))});
+  pr.on('error',e=>{clearTimeout(to);nSt(e.type==='peer-unavailable'?'No game with that code.':'Connection error: '+(e.type||''))})})}
+function openNet(){$n('nto').classList.add('on');if(net.on){$n('ntm').style.display='none';$n('ntlv').style.display='';nSt('Connected.')}else{$n('ntm').style.display='';$n('nthv').style.display=$n('ntjv').style.display='none';$n('ntlv').style.display='none';nSt('')}}
+$n('ntx').onclick=()=>$n('nto').classList.remove('on');
+$n('nto').addEventListener('click',e=>{if(e.target===$n('nto'))$n('nto').classList.remove('on')});
+$n('nth').onclick=netHost;$n('ntj').onclick=()=>{$n('ntm').style.display='none';$n('ntjv').style.display='';$n('ntin').focus()};
+$n('ntgo').onclick=()=>netJoin($n('ntin').value);
+$n('ntlv').onclick=()=>{netEnd('You left the game.');$n('ntm').style.display=''};
+addEventListener('load',()=>{const m=/#join=([A-Za-z]{4})/.exec(location.hash);if(m){$n('nto').classList.add('on');$n('ntm').style.display='none';netJoin(m[1])}});
+
 const camBtn=addBtn('c',0,-PI/2,()=>{orbit=!orbit;camBtn.material.opacity=orbit?1:.55});camBtn.position.set(-1.53,.1,0);camBtn.material.opacity=.55;
 const bt={};
 /* ---------- paddles held by the building ---------- */
@@ -1906,7 +1976,7 @@ function anim(p,now){if(p.push)return;p.sp=(p.sp||1)+((p.hot?1.45:1)-(p.sp||1))*
    g.rotation.set(Math.sin(pr*14+1)*.5*q,az+8*PI*(1-q*q),Math.cos(pr*11)*.5*q);idle(g,tt,1)}return}
  if(!p.done){p.done=true;clip(g,null);p.hole&&(scene.remove(p.hole),p.hole=null)}
  const hop=0;let yy=idle(g,tt,p.type);if(p.yb){const k=Math.min(1,(now-p.yb.t0)/400);yy=la(p.yb.from,yy,k*k*(3-2*k));if(k>=1)p.yb=null}if(p.fy!=null){const tg=p.fyOff?0:1;p.fyk=(p.fyk||0)+(tg-(p.fyk||0))*(1-Math.exp(-7*FD));if(p.fyOff&&p.fyk<.02){p.fy=null;p.fyOff=false;p.fyk=0}else yy=la(yy,p.fy,p.fyk)}g.position.set(p.x,p.Y+hop,p.z);g.rotation.set(0,yy,0);blinkStep(p,now)}
-function frame(now){if(intro===0)placeVer();requestAnimationFrame(frame);const rn=now,dt=Math.min(.05,(rn-lastT)/1000);lastT=rn;if(cine)slowStep(rn,dt);else tsc+=(1-tsc)*Math.min(1,dt*6);vOff+=dt*1000*(1-tsc);now=rn-vOff;FD=dt*tsc;if(intro===1)introStep(now);else if(intro===0)head.position.y=-1.8+Math.sin(now/450)*.07;if(cine)cineStep(rn,dt);else if(camBack)backStep(dt);else if(orbit&&!rot&&!mrot){az+=dt*.18;updCam()}
+function frame(now){if(intro===0)placeVer();netPump();requestAnimationFrame(frame);const rn=now,dt=Math.min(.05,(rn-lastT)/1000);lastT=rn;if(cine)slowStep(rn,dt);else tsc+=(1-tsc)*Math.min(1,dt*6);vOff+=dt*1000*(1-tsc);now=rn-vOff;FD=dt*tsc;if(intro===1)introStep(now);else if(intro===0)head.position.y=-1.8+Math.sin(now/450)*.07;if(cine)cineStep(rn,dt);else if(camBack)backStep(dt);else if(orbit&&!rot&&!mrot){az+=dt*.18;updCam()}
  bsp+=((musicOn&&!bgm.paused?2.4:0)-bsp)*Math.min(1,dt*(musicOn?3:10));btnMusic.rotation.z-=bsp*dt;
  fin=pieces.every(p=>now-p.t0>=(p.type?1800:800))&&!pieces.some(p=>p.fly);if(!over){pieces.forEach(p=>p.hot=false);LINES.forEach(L=>{const v=L.map(i=>g[i]),z=v.indexOf(0);if(z<0)return;const o=v.filter((x,i)=>i!==z);if(o[0]&&o[0]===o[1]){const ps=pieces.filter(p=>L.includes(p.a));if(ps[0])ps[0].hot=true}})}else pieces.forEach(p=>p.hot=false);
  if(aiTurn()&&intro===2&&fin&&!pend&&!scoring&&!aiPend&&now>=lockT){aiPend=true;setTimeout(()=>{aiPend=false;if(aiTurn())aiMove()},(cpuF[0]&&cpuF[1])?500:700)}
