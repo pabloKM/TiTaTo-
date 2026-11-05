@@ -60,7 +60,7 @@ html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 <div id="qro"><div id="qrb"><b>Scan to play!</b><canvas id="qrc"></canvas><small>Point a phone camera here and open the link. To keep it as an app, tap Share, then Add to Home Screen.</small><small style="margin-top:8px">Tap anywhere to close</small></div></div>
 <div id="nto"><div id="ntb"><button id="ntx">✕</button><h3>Play a friend</h3><div id="ntm"><button id="nth">Host a game</button><button id="ntj">Join a game</button></div><div id="nthv" style="display:none"><div class="code" id="ntcode"></div><canvas id="ntc"></canvas><small>Your friend scans this, or types the code under Join.</small></div><div id="ntjv" style="display:none"><input id="ntin" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="CODE"><br><button id="ntgo">Join</button></div><div id="nts"></div><button id="ntlv" style="display:none">Leave game</button></div></div>
 <div id="nchip"></div>
-<div id="ver">ver.0.25</div>
+<div id="ver">ver.0.26</div>
 <header><div id="st"></div><div id="sw"></div><button id="rs" aria-label="Restart">↻</button><button id="mu" aria-label="Music" aria-pressed="true">♪</button></header>
 <canvas id="c"></canvas>
 <canvas id="pan" width="440" height="340"></canvas>
@@ -1375,7 +1375,7 @@ function drawQR(c,u){const q=new QRC(-1,1);q.addData(u);q.make();const n=q.getMo
 function showQR(){drawQR(document.getElementById('qrc'),location.href.split('#')[0].split('?')[0]);document.getElementById('qro').classList.add('on')}
 document.getElementById('qro').addEventListener('click',()=>document.getElementById('qro').classList.remove('on'));
 /* ---------- online play (2 phones, PeerJS) ---------- */
-const BUILD='0.25',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
+const BUILD='0.26',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
 const $n=i=>document.getElementById(i),nSt=t=>{$n('nts').textContent=t||''};
 const snap=()=>g.join('')+'|'+mvd+'|'+turn+'|'+pieces.length+'|'+lockT;
 const _pl=place,_df=doFlick,_dr=doRot,_rs=reset,_tc=toggleCpu,_pp=pickPiece;
@@ -1426,6 +1426,11 @@ $n('nto').addEventListener('click',e=>{if(e.target===$n('nto'))$n('nto').classLi
 $n('nth').onclick=netHost;$n('ntj').onclick=()=>{$n('ntm').style.display='none';$n('ntjv').style.display='';$n('ntin').focus()};
 $n('ntgo').onclick=()=>netJoin($n('ntin').value);
 $n('ntlv').onclick=()=>{netEnd('You left the game.');$n('ntm').style.display=''};
+/* self-update: compare the live build number with this one and reload if stale */
+addEventListener('load',()=>{if(location.protocol==='file:'||/[?&]v=/.test(location.search))return;
+ fetch(location.pathname,{cache:'no-store'}).then(async r=>{const rd=r.body.getReader(),td=new TextDecoder();let t='';
+  for(let i=0;i<40;i++){const c=await rd.read();if(c.done)break;t+=td.decode(c.value,{stream:true});const m=/id="ver">ver\.([0-9.]+)</.exec(t);if(m){rd.cancel();if(m[1]!==BUILD)location.replace(location.pathname+'?v='+Date.now()+location.hash);return}}
+  rd.cancel()}).catch(()=>{})});
 addEventListener('load',()=>{const m=/#join=([A-Za-z]{4})/.exec(location.hash);if(m){$n('nto').classList.add('on');$n('ntm').style.display='none';netJoin(m[1])}});
 
 const camBtn=addBtn('c',0,-PI/2,()=>{orbit=!orbit;camBtn.material.opacity=orbit?1:.55});camBtn.position.set(-1.53,.1,0);camBtn.material.opacity=.55;
