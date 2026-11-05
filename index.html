@@ -81,12 +81,12 @@ html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 #cr.on{display:block}
 #crn span{position:absolute;white-space:nowrap;cursor:pointer;transition:opacity .35s,transform .35s;user-select:none;-webkit-user-select:none;will-change:transform}
 #crx{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:calc(env(safe-area-inset-top,0px) + 12px);z-index:3;font:900 18px system-ui,-apple-system,sans-serif;color:#000;background:#fff;border:3px solid #000;border-radius:12px;box-shadow:3px 3px 0 #000;padding:4px 12px}
-#crs{position:absolute;left:50%;bottom:calc(10% + env(safe-area-inset-bottom,0px));width:70px;height:70px;transform:translateX(-50%);z-index:2;pointer-events:none}
-#crb{position:absolute;left:50%;bottom:calc(100% + 16px);transform:translateX(-50%);width:max-content;max-width:min(300px,86vw);background:#fff;border:3px solid #000;border-radius:18px;box-shadow:4px 4px 0 #000;padding:9px 14px;text-align:center;font:700 15px/1.3 system-ui,-apple-system,sans-serif;animation:crp .3s cubic-bezier(.3,1.7,.5,1)}
+#crs{position:absolute;right:max(40px,env(safe-area-inset-right,0px));bottom:calc(8% + env(safe-area-inset-bottom,0px));width:70px;height:70px;z-index:2;pointer-events:none}
+#crb{position:absolute;right:-14px;bottom:calc(100% + 16px);transform-origin:85% 100%;width:max-content;max-width:min(300px,86vw);background:#fff;border:3px solid #000;border-radius:18px;box-shadow:4px 4px 0 #000;padding:9px 14px;text-align:center;font:700 15px/1.3 system-ui,-apple-system,sans-serif;animation:crp .3s cubic-bezier(.3,1.7,.5,1)}
 #crb b{display:block;font:900 20px/1.1 system-ui,-apple-system,sans-serif;margin-bottom:2px}
-#crb:after{content:'';position:absolute;left:50%;bottom:-16px;margin-left:-10px;border:10px solid transparent;border-top:14px solid #000;border-bottom:0}
-#crb:before{content:'';position:absolute;left:50%;bottom:-10px;margin-left:-6px;border:6px solid transparent;border-top:10px solid #fff;border-bottom:0;z-index:1}
-@keyframes crp{from{transform:translateX(-50%) scale(.2);opacity:0}to{transform:translateX(-50%) scale(1);opacity:1}}
+#crb:after{content:'';position:absolute;right:46px;bottom:-16px;border:10px solid transparent;border-top:14px solid #000;border-bottom:0}
+#crb:before{content:'';position:absolute;right:50px;bottom:-10px;border:6px solid transparent;border-top:10px solid #fff;border-bottom:0;z-index:1}
+@keyframes crp{from{transform:scale(.2);opacity:0}to{transform:scale(1);opacity:1}}
 </style></head><body>
 <div id="qro"><div id="qrb"><b>Scan to play!</b><canvas id="qrc"></canvas><small>Point a phone camera here and open the link. To keep it as an app, tap Share, then Add to Home Screen.</small><small style="margin-top:8px">Tap anywhere to close</small></div></div>
 <div id="nto"><div id="ntb"><button id="ntx">✕</button><h3>Play a friend</h3><div id="ntm"><button id="nth">Host a game</button><button id="ntj">Join a game</button></div><div id="nthv" style="display:none"><div class="code" id="ntcode"></div><canvas id="ntc"></canvas><small>Your friend scans this, or types the code under Join.</small></div><div id="ntjv" style="display:none"><input id="ntin" maxlength="4" autocomplete="off" autocapitalize="characters" placeholder="CODE"><br><button id="ntgo">Join</button></div><div id="nts"></div><button id="ntlv" style="display:none">Leave game</button></div></div>
@@ -95,7 +95,7 @@ html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 <div id="mnu"><div id="mnb"><h3>Menu</h3><button id="mnR">New game</button><button id="mnD">Dark mode: off</button><button id="mnC">Colors</button><button id="mnK">Credits</button><button id="mnF">Move confirm: off</button><button id="mnX">Close</button></div></div>
 <div id="cr"><button id="crx">✕</button><div id="crn"></div><div id="crs"><div id="crb"></div></div></div>
 <div id="cs"><div id="cst"></div><div id="csp"><div class="row"><button id="csO" class="on">O</button><button id="csX">X</button></div><div class="row"><button id="csP" class="on">Primary</button><button id="csS">Secondary</button></div><label>Hue</label><input type="range" id="csH" min="0" max="360"><label>Saturation</label><input type="range" id="csA" min="0" max="100"><label>Brightness</label><input type="range" id="csL" min="10" max="100"><button id="csd">Done</button></div></div>
-<div id="ver">ver.0.29</div>
+<div id="ver">ver.0.30</div>
 <header><div id="st"></div><div id="sw"></div><button id="rs" aria-label="Restart">↻</button><button id="mu" aria-label="Music" aria-pressed="true">♪</button></header>
 <canvas id="c"></canvas>
 <canvas id="pan" width="440" height="340"></canvas>
@@ -1411,7 +1411,7 @@ function drawQR(c,u){const q=new QRC(-1,1);q.addData(u);q.make();const n=q.getMo
 function showQR(){drawQR(document.getElementById('qrc'),location.href.split('#')[0].split('?')[0]);document.getElementById('qro').classList.add('on')}
 document.getElementById('qro').addEventListener('click',()=>document.getElementById('qro').classList.remove('on'));
 /* ---------- online play (2 phones, PeerJS) ---------- */
-const BUILD='0.29',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
+const BUILD='0.30',net={on:false,me:0,conn:null,peer:null,q:[],start:false,inn:false};
 const $n=i=>document.getElementById(i),nSt=t=>{$n('nts').textContent=t||''};
 const snap=()=>g.join('')+'|'+mvd+'|'+turn+'|'+pieces.length+'|'+lockT;
 const _pl=place,_df=doFlick,_dr=doRot,_rs=reset,_tc=toggleCpu,_pp=pickPiece;
@@ -1535,8 +1535,8 @@ function makeSun(){const PL=SUNPAL[0],coreM=new THREE.MeshBasicMaterial({color:P
  const sml=new THREE.Mesh(new THREE.TorusGeometry(.09,.014,6,14,PI),ink);sml.rotation.z=PI;sml.position.set(0,.045,2.115);root.add(sml);
  root.scale.setScalar(1/3);scene3.add(root);return{root,core,wire,coreM,cm,ch,eyes,ns,mo,sml,k1:new THREE.Color(),k2:new THREE.Color()}}
 function crSay(i,now){crI=i;crT=now;crSp=now+2600;const [n,w]=CRED[i],b=$n('crb');b.style.animation='none';void b.offsetWidth;b.style.animation='';b.innerHTML='<b></b>';b.firstChild.textContent=n;b.append(document.createTextNode(w));if(!SUN)SUN=makeSun();{const PL=SUNPAL[i%SUNPAL.length];SUN.k1.set(PL[0]);SUN.k2.set(PL[1]);SUN.cm.color.set(PL[2])}crEls.forEach((e,k)=>{e.el.style.opacity=k===i?.95:.2;e.el.style.transform=''})}
-function openCr(){const host=$n('crn');if(!crEls){host.innerHTML='';crEls=CRED.map((c,i)=>{const el=document.createElement('span');el.textContent=c[0];el.style.fontFamily=FONTS[(i*3+1)%FONTS.length];el.style.fontSize=(30+Math.random()*34|0)+'px';if(Math.random()<.35)el.style.fontStyle='italic';el.style.fontWeight=700;el.style.opacity=.2;el.onclick=()=>crSay(i,performance.now());host.append(el);
-  return{el,u:.12+(i%2)*.46+Math.random()*.1,v:.11+(i/2|0)*.145+Math.random()*.03,ph:Math.random()*6.28}})}
+function openCr(){const host=$n('crn');if(!crEls){host.innerHTML='';crEls=CRED.map((c,i)=>{const el=document.createElement('span');el.textContent=c[0];el.style.fontFamily=FONTS[(i*3+1)%FONTS.length];el.style.fontSize=(26+Math.random()*20|0)+'px';if(Math.random()<.35)el.style.fontStyle='italic';el.style.fontWeight=700;el.style.opacity=.2;el.onclick=()=>crSay(i,performance.now());host.append(el);
+  return{el,u:.07+(i%2)*.5+Math.random()*.05,v:.09+(i/2|0)*.11+Math.random()*.025,ph:Math.random()*6.28}})}
  crOn=true;$n('cr').classList.add('on');crSay(0,performance.now())}
 function crStep(now){const t=now/1000,W=innerWidth,H=innerHeight;
  crEls.forEach((e,k)=>{const x=Math.max(8,Math.min(W-e.el.offsetWidth*1.25-8,e.u*W+Math.sin(t*.45+e.ph)*16)),y=e.v*H+Math.cos(t*.35+e.ph*1.3)*14,s=k===crI?1.25:1;e.el.style.left=x+'px';e.el.style.top=y+'px';e.el.style.transform='scale('+s+') rotate('+Math.sin(t*.3+e.ph)*4+'deg)'});
@@ -1546,7 +1546,7 @@ function crStep(now){const t=now/1000,W=innerWidth,H=innerHeight;
  S.root.scale.setScalar((1/3)*(1+.14*Math.max(0,1-(now-crT)/260)));S.wire.rotation.y=t*1.4;S.wire.material.color.set(TH[th].R);
  S.coreM.color.copy(S.k1).lerp(S.k2,.5+.5*Math.sin(t*5));S.core.scale.setScalar(1+.04*Math.sin(t*6));S.ch.forEach(c=>c.scale.setScalar(1+.18*Math.sin(t*7)));
  const bl=(t%3.2)<.12?1:0;S.eyes.forEach(e=>e.scale.set(1+.5*bl,1.6*(1-bl)+.14*bl,1));
- S.mo.visible=talk;S.sml.visible=!talk;if(talk)S.mo.scale.setScalar(3+3.5*Math.abs(Math.sin(t*14)));
+ S.mo.visible=talk;S.sml.visible=!talk;if(talk)S.mo.scale.setScalar(.75+.875*Math.abs(Math.sin(t*14)));
  if(now-crT>4200)crSay((crI+1)%CRED.length,now)}
 $n('crx').onclick=()=>{crOn=false;$n('cr').classList.remove('on')};
 $n('mnK').onclick=()=>{closeMn();openCr()};
