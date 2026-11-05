@@ -21,7 +21,7 @@ jobs:
       - name: Collect site files
         run: |
           mkdir site
-          cp index.html icon.png site/
+          cp index.html icon.png manifest.webmanifest site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
