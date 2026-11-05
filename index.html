@@ -35,11 +35,11 @@ html,body{overflow:hidden;height:100%;overscroll-behavior:none}html,body{backgro
 html[data-theme="dark"],html[data-theme="dark"] body{background:#000}
 html[data-theme="dark"] #c{filter:invert(1) hue-rotate(180deg)}
 #ver{position:fixed;left:57%;top:30%;transform:rotate(-3deg);z-index:20;pointer-events:none;background:#fff;color:#000;border:2px solid #000;border-radius:13px;padding:5px 11px;font:900 15px/1 system-ui,-apple-system,sans-serif;letter-spacing:.5px;box-shadow:3px 3px 0 #000;white-space:nowrap;transition:opacity .35s,transform .35s}
-#ver:after{content:'';position:absolute;left:-15px;bottom:5px;border:7px solid transparent;border-right:14px solid #000;border-left:0}
-#ver:before{content:'';position:absolute;left:-10px;bottom:7px;border:5px solid transparent;border-right:10px solid #fff;border-left:0;z-index:1}
+#ver:after{content:'';position:absolute;left:2px;bottom:-23px;width:25px;height:25px;background:#000;clip-path:polygon(0 100%,18% 0,100% 0)}
+#ver:before{content:'';position:absolute;left:5px;bottom:-18px;width:19px;height:21px;background:#fff;clip-path:polygon(0 100%,22% 0,100% 0);z-index:1}
 #ver.off{opacity:0;transform:translateX(10px) rotate(-3deg)}
 </style></head><body>
-<div id="ver">ver.0.22</div>
+<div id="ver">ver.0.23</div>
 <header><div id="st"></div><div id="sw"></div><button id="rs" aria-label="Restart">↻</button><button id="mu" aria-label="Music" aria-pressed="true">♪</button></header>
 <canvas id="c"></canvas>
 <canvas id="pan" width="440" height="340"></canvas>
@@ -162,8 +162,8 @@ function placeVer(){if(!_vb)return;head.updateMatrixWorld(true);cam.updateMatrix
  mouth.getWorldPosition(_mp);_ma.copy(_mp);const m=pr(_mp);
  _mb.copy(_ma);_mb.x+=0;_mb.y+=0;const sx=new THREE.Vector3(0,0,.5).applyMatrix4(sm.matrixWorld),ox=new THREE.Vector3(0,0,0).applyMatrix4(sm.matrixWorld);
  const a=pr(sx),b=pr(ox),ppu=Math.hypot(a[0]-b[0],a[1]-b[1])*2||60;
- const w=_vb.offsetWidth,h=_vb.offsetHeight;let tipX=m[0]+.35*ppu,left=tipX+15;left=Math.min(left,innerWidth-w-8);
- _vb.style.left=left+'px';_vb.style.top=(m[1]+8-h)+'px'}
+ const w=_vb.offsetWidth,h=_vb.offsetHeight;let tipX=m[0]+.35*ppu,k=innerWidth/383,left=tipX+15+12*k;left=Math.min(left,innerWidth-w-8);
+ _vb.style.left=left+'px';_vb.style.top=(m[1]+8-h-48*k)+'px'}
 function startIntro(){const vb=document.getElementById('ver');if(vb)vb.classList.add('off');intro=1;iT=performance.now();plat.visible=true;sparked=false}
 function introStep(now){const t=now-iT,c=k=>Math.min(1,Math.max(0,k)),oc=k=>1-(1-k)**3,io=k=>k<.5?4*k**3:1-(-2*k+2)**3/2;
  let hy=0,sy=1,fs=0,w=1,m2=1;
