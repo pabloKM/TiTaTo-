@@ -11,7 +11,6 @@
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font:600 16px/1.2 system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent}
-body::before{content:"";position:fixed;inset:0 0 auto;height:calc(env(safe-area-inset-top,0px) + 8px);background:linear-gradient(rgba(0,0,0,.26),transparent);z-index:10;pointer-events:none}
 header{position:fixed;left:0;right:0;bottom:0;z-index:9;background:var(--bg);display:flex;align-items:center;gap:10px;padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));border-top:2px solid var(--ink);max-width:480px;margin:0 auto}
 #st{flex:1}#st b{display:block;font-size:20px}#st small{font-weight:500;opacity:.7;font-size:12px}
 #sw{display:flex;gap:7px}
@@ -428,14 +427,14 @@ function doScore(){const ws=pend;pend=null;scoring=true;const t0=scoreT0=perform
   segD=(P,A,E)=>{const ab=E.clone().sub(A),u=Math.max(0,Math.min(1,P.clone().sub(A).dot(ab)/ab.dot(ab))),Q=A.clone().addScaledVector(ab,u);return{d:P.distanceTo(Q),Q,u}},
   near=[];pieces.forEach(p=>{if(cells.has(p.a)||p.fly||p.push||!p.done)return;const P=new THREE.Vector3(p.x,p.Y+.8,p.z);let b=null;rigs.forEach(r=>{const h=segD(P,r.A,r.E);if(!b||h.d<b.d)b=h});
    if(b&&b.d<1.5){const ax=P.x-b.Q.x,zz=P.z-b.Q.z,l=Math.hypot(ax,zz)||1;near.push({p,ax:ax/l,az:zz/l,u:b.u})}});
- {const pc={};pieces.forEach(q=>{if(!q.fly&&q.done)pc[q.a]=q});const G2=g.slice(),used=new Set(),nw=performance.now(),wc=c=>new THREE.Vector3((c%3)-1,B+T+(c/9|0)*SY+.12,((c/3|0)%3)-1);let any=false;
+ {const pc={};pieces.forEach(q=>{if(!q.fly&&q.done)pc[q.a]=q});const G2=g.slice(),used=new Set(),nw=performance.now(),wc=c=>new THREE.Vector3((c%3)-1,B+T+(c/9|0)*SY+.12,((c/3|0)%3)-1);let any=false;scoreFallPs=[];
   near.forEach(n=>{const di=Math.abs(n.ax)>=Math.abs(n.az)?Math.sign(n.ax):0,dj=di?0:Math.sign(n.az);if(!di&&!dj)return;
    const ch=[];let i=n.p.a%3,j=(n.p.a/3|0)%3;const k=n.p.a/9|0;let ok=true,off=false;
    for(;;){const c=i+3*j+9*k;if(!G2[c])break;const q=pc[c];if(cells.has(c)||!q||used.has(q)){ok=false;break}ch.push(c);i+=di;j+=dj;if(i<0||i>2||j<0||j>2){off=true;break}}
    if(!ok||!ch.length)return;any=true;const t1=t0+950+300*n.u+100,moved=[];
    for(let x=ch.length-1;x>=0;x--){const from=ch[x],to=(off&&x===ch.length-1)?-1:from+di+3*dj,q=pc[from];if(to>=0)G2[to]=G2[from];G2[from]=0;delete pc[from];if(to>=0)pc[to]=q;used.add(q);moved[x]={q,from,to}}
    moved.forEach(({q,from,to},x)=>{const fl=to<0,f={t0:t1+x*70,kind:fl?'fall':x?'shove':'roll',x0:q.x,z0:q.z,y0:q.Y,s0:q.grp.scale.clone(),dx:di,dz:dj,first:false,face:false,beam:true,pre:0,mv:fl?1100:x?420:640,post:fl?0:x?150:260,y1:q.Y};f.d=f.pre+f.mv+f.post;
-    if(!fl){q.a=to;q.x=(to%3)-1;q.z=((to/3|0)%3)-1}q.fly=f;if(fl)return;const a0=wc(from),b0=wc(to);
+    if(!fl){q.a=to;q.x=(to%3)-1;q.z=((to/3|0)%3)-1}q.fly=f;if(fl){scoreFallPs.push(q);return}const a0=wc(from),b0=wc(to);
     for(let m=0;m<(x?4:6);m++)dust(a0.clone().lerp(b0,m/(x?3.2:4.5)),f.t0-nw+f.mv*m*.2,x?.55:.7)})});
   if(any)for(let c=0;c<27;c++)g[c]=G2[c]}
  const GY=new THREE.Color(0xffe14a),GY2=new THREE.Color(0xffb300),
@@ -471,8 +470,8 @@ function doScore(){const ws=pend;pend=null;scoring=true;const t0=scoreT0=perform
    if(!h.halo){h.halo=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:GLOW,transparent:true,opacity:0,depthWrite:false}));h.halo.scale.setScalar(2.8);h.halo.position.y=h.p.type?.9:.55;G.add(h.halo)}
    h.halo.material.opacity=a*(.55+.25*pu);
    G.rotation.y=la(G.rotation.y,Math.atan2(h.r.mouth.x-h.p.x,h.r.mouth.z-h.p.z),eo(a));G.position.x+=Math.sin(t/20)*.03*a;G.position.y+=eo(a)*(.34+.05*Math.sin(t/120))});
-  if(!boom&&t>=1750){boom=true;explode()}},kill(){near.forEach(n=>{n.p.eyeForce=false});rigs.forEach(r=>scene.remove(r.root));scoring=false;sunRigs=null;scoreCheck();pan.style.display='none'}})}
-let cSave=null,cT=0,cIdx=0,sunRigs=null,scoreT0=0;
+  if(!boom&&t>=1750){boom=true;explode()}},kill(){near.forEach(n=>{n.p.eyeForce=false});rigs.forEach(r=>scene.remove(r.root));scoring=false;sunRigs=null;scoreFallPs=[];scoreCheck();pan.style.display='none'}})}
+let cSave=null,cT=0,cIdx=0,sunRigs=null,scoreT0=0,scoreFallPs=[];
 function cineOn(){if(cine)return;cine=true;cSave={az,el,orbit,cf:cpuF.slice()};cpuF[0]=cpuF[1]=true;aiPend=false;orbit=false;camBack=false;cT=0;cIdx=0;cShot=null;cEv='';cLast='';slowUntil=0;tsOn(true)}
 function cineOff(){if(!cine)return;cine=false;orbit=cSave.orbit;cpuF[0]=cSave.cf[0];cpuF[1]=cSave.cf[1];aiPend=false;camBack=true;slowUntil=0;tsOn(false)}
 let cShot=null,cEv='',cLast='',slowFrom=0,slowUntil=0,slowK=1,lastCen=new THREE.Vector3(),cVar='';
@@ -480,47 +479,46 @@ function slowStep(rn,dt){const want=(rn>=slowFrom&&rn<slowUntil)?slowK:1;tsc+=(w
 function setSlow(rn,delay,len,k){slowFrom=rn+delay;slowUntil=rn+delay+len;slowK=k}
 const cenOf=(list,dy)=>{const c=new THREE.Vector3();if(!list.length)return c.copy(lastCen);list.forEach(p=>c.add(p.grp.position));c.divideScalar(list.length);c.y+=dy;return c};
 const spreadOf=(list,c)=>list.reduce((m,p)=>Math.max(m,p.grp.position.distanceTo(c)),0);
-const pickR=a=>a[Math.random()*a.length|0];
-function mkShot(rn,ps){const kinds=(ps.length?['hero','low','group','pan','wide','pull','lowgroup','track']:['pan','wide','pull']).filter(k=>k!==cLast),k=pickR(kinds);cLast=k;
- const sg=Math.random()<.5?-1:1,s={k,t0:rn,dur:3000+Math.random()*1900,ar:sg*(.05+Math.random()*.18)},P=ps.length?pickR(ps):null;
- if(P){s.p=P;const c=P.grp.position;s.ps=ps.filter(q=>q.grp.position.distanceTo(c)<3.8);if(s.ps.length<2)s.ps=ps.slice().sort((x,y)=>x.grp.position.distanceTo(c)-y.grp.position.distanceTo(c)).slice(0,3)}
- if(k==='hero'){s.zz0=s.zz1=2.1;s.ee=.45}
- else if(k==='low'){s.zz0=2.0;s.zz1=2.55;s.ee=-.3;s.ar*=.35}
- else if(k==='group'){s.ee=.4}
- else if(k==='lowgroup'){s.ee=-.22;s.ar*=.4}
- else if(k==='track'){s.zz0=s.zz1=2.3;s.ee=.4;s.fast=true}
- else if(k==='wide'){s.zz0=1.04+Math.random()*.1;s.zz1=s.zz0+.08;s.ee=.3+Math.random()*.3}
- else if(k==='pull'){s.zz0=2.5;s.zz1=1.15;s.ee=.42}
- else if(k==='pan'){const up=Math.random()<.4,R=new THREE.Vector3(Math.cos(az),0,-Math.sin(az)),m=sg;
-  s.a=up?new THREE.Vector3(0,ty0-3.2,0):R.clone().multiplyScalar(-2.6*m).add(new THREE.Vector3(0,ty0+(Math.random()-.5)*3,0));
-  s.b=up?new THREE.Vector3(0,ty0+3.2,0):R.clone().multiplyScalar(2.6*m).add(new THREE.Vector3(0,s.a.y,0));if(up&&Math.random()<.5){const t=s.a;s.a=s.b;s.b=t}
-  s.zz0=s.zz1=1.45;s.ee=.4;s.dur=3600+Math.random()*1200;s.ar*=.3}
+const pickR=a=>a[Math.random()*a.length|0],fitZ=(sp,k,lo,hi)=>Math.max(lo,Math.min(hi,k/(sp+1.6)));
+/* idle shots look at the tower itself, never at a character standing still */
+function mkShot(rn){const k=pickR(['wide','pan','pull','lowtower','orbit'].filter(x=>x!==cLast));cLast=k;
+ const sg=Math.random()<.5?-1:1,s={k,t0:rn,dur:2200+Math.random()*1500,ar:sg*(.06+Math.random()*.2),zz0:1.3,zz1:1.3,ee:.4,fast:false};
+ if(k==='wide'){s.zz0=1.04+Math.random()*.1;s.zz1=s.zz0+.08;s.ee=.3+Math.random()*.3}
+ else if(k==='pull'){s.zz0=2.3;s.zz1=1.15;s.ee=.42;s.y0=ty0+(Math.random()-.5)*5}
+ else if(k==='lowtower'){s.zz0=1.2;s.zz1=1.45;s.ee=-.3;s.ar*=.4}
+ else if(k==='orbit'){s.zz0=1.25;s.zz1=1.25;s.ar=sg*(.35+Math.random()*.15)}
+ else{const up=Math.random()<.45,R=new THREE.Vector3(Math.cos(az),0,-Math.sin(az));
+  s.a=up?new THREE.Vector3(0,ty0-3.2,0):R.clone().multiplyScalar(-2.6*sg).add(new THREE.Vector3(0,ty0+(Math.random()-.5)*3,0));
+  s.b=up?new THREE.Vector3(0,ty0+3.2,0):R.clone().multiplyScalar(2.6*sg).add(new THREE.Vector3(0,s.a.y,0));if(up&&Math.random()<.5){const t=s.a;s.a=s.b;s.b=t}
+  s.zz0=s.zz1=1.45;s.dur=2800+Math.random()*1000;s.ar*=.3;s.fast=true}
  return s}
-function cineStep(rn,dt){const act=pieces.filter(p=>p.fly&&performance.now()>=p.fly.t0),fo=act.find(p=>p.fly.kind==='fall'||p.fly.kind==='eject'),ps=pieces.filter(p=>!p.fly&&!p.sc&&p.done),sc=pieces.filter(p=>p.sc);
- const ev=fo?'fall':(sunRigs&&sunRigs.length)?'sun':act.length?'act':((pend||scoring)&&sc.length)?'clr':'';
- if(ev!==cEv){cEv=ev;cVar=pickR(ev==='sun'?['mouth','lowclr','wideclr','groupclr']:ev==='act'?['track','low','wide','group']:ev==='fall'?['follow','follow','low']:['group','low']);
-  if(ev==='fall'&&Math.random()<.65)setSlow(rn,120,1900,.33);
+function cineStep(rn,dt){const nowv=performance.now(),act=pieces.filter(p=>!p.sc&&((p.fly&&nowv>=p.fly.t0)||!p.done)),fo=act.find(p=>p.fly&&(p.fly.kind==='fall'||p.fly.kind==='eject')),sc=pieces.filter(p=>p.sc);
+ const sunOn=!!(sunRigs&&sunRigs.length),fallPs=scoreFallPs.filter(p=>pieces.includes(p)),
+  ev=((sunOn||scoring)&&(fo||fallPs.length))?'combo':fo?'fall':sunOn?'sun':act.length?'act':((pend||scoring)&&sc.length)?'clr':'';
+ if(ev!==cEv){cEv=ev;const spin=act.some(p=>p.fly&&p.fly.kind==='ring');
+  cVar=pickR(ev==='sun'?['mouth','lowclr','wideclr','groupclr']:ev==='act'?(spin?['group','group','wide']:['track','low','wide','group']):ev==='fall'?['follow','follow','low']:['group','low']);
+  if(ev==='combo'&&Math.random()<.6)setSlow(rn,700,2100,.3);
+  else if(ev==='fall'&&Math.random()<.65)setSlow(rn,120,1900,.33);
   else if(ev==='sun'&&Math.random()<.55)setSlow(rn,850,1700,.3);
-  else if(ev==='act'&&act.some(p=>p.fly.angry||p.fly.kind==='roll'||p.fly.kind==='shove')&&Math.random()<.45)setSlow(rn,100,1200,.4);
+  else if(ev==='act'&&act.some(p=>p.fly&&(p.fly.angry||p.fly.kind==='roll'||p.fly.kind==='shove'))&&Math.random()<.45)setSlow(rn,100,1200,.4);
   if(ev)cShot=null}
  const tg=new THREE.Vector3(0,ty0,0);let zz=1.5,ee=.5,ar=.15,fast=false;
- if(ev==='fall'){tg.copy(fo.grp.position);tg.y+=.6;zz=cVar==='low'?2.1:1.7;ee=cVar==='low'?-.28:-.34;ar=.05}
+ if(ev==='combo'){const r=sunOn?sunRigs[0]:null,L=[];if(r)L.push(r.root.position);sc.forEach(p=>L.push(p.grp.position));(fo?[fo]:[]).concat(fallPs).forEach(p=>L.push(p.grp.position));
+  tg.set(0,0,0);L.forEach(v=>tg.add(v));tg.divideScalar(Math.max(1,L.length));let sp=0;L.forEach(v=>{sp=Math.max(sp,v.distanceTo(tg))});
+  zz=Math.max(.7,Math.min(1.5,5/(sp+2.6)));ee=.38;ar=0;fast=true;
+  if(r&&Math.abs(r.d.y)<.9){const a1=Math.atan2(r.d.z,-r.d.x),a2=a1+PI,t=Math.abs(wr(a1-az))<Math.abs(wr(a2-az))?a1:a2;az+=wr(t-az)*(1-Math.exp(-1.8*dt))}}
+ else if(ev==='fall'){tg.copy(fo.grp.position);tg.y+=.6;zz=cVar==='low'?2.1:1.7;ee=cVar==='low'?-.28:-.34;ar=.05;fast=true}
  else if(ev==='sun'){const r=sunRigs[0];
   if(cVar==='mouth'){tg.copy(r.mouth);zz=.8;ar=0;az+=wr(Math.atan2(r.d.x,r.d.z)-az)*(1-Math.exp(-2.2*dt));ee=Math.max(-.5,Math.min(1.25,Math.asin(Math.max(-1,Math.min(1,r.d.y)))))}
   else if(cVar==='lowclr'){tg.copy(cenOf(sc,.8));zz=1.9;ee=-.3;ar=.1}
   else if(cVar==='wideclr'){zz=1.06;ee=.42;ar=.12}
-  else{const l=sc.length?sc:ps.slice(0,5);tg.copy(cenOf(l,.9));zz=Math.max(1.1,Math.min(2,3.4/(spreadOf(l,tg)+1.6)));ee=.35;ar=.18}}
+  else{const l=sc.length?sc:act;tg.copy(cenOf(l,.9));zz=fitZ(spreadOf(l,tg),3.4,1.1,2);ee=.35;ar=.18}}
  else if(ev==='act'||ev==='clr'){const l=ev==='act'?act:sc;tg.copy(cenOf(l,.75));fast=true;
-  if(cVar==='track'){zz=2.3;ee=.42;ar=.3}else if(cVar==='low'){zz=2.15;ee=-.26;ar=.12}else if(cVar==='wide'){zz=1.12;ee=.4;ar=.2;tg.lerp(new THREE.Vector3(0,ty0,0),.55)}else{zz=Math.max(1.2,Math.min(2.1,3.4/(spreadOf(l,tg)+1.6)));ee=.38;ar=.22}}
- else{if(!cShot||rn>cShot.t0+cShot.dur)cShot=mkShot(rn,ps);const s=cShot,u=Math.min(1,(rn-s.t0)/s.dur),e=u*u*(3-2*u);ar=s.ar;ee=s.ee;zz=s.zz0!==undefined?s.zz0+(s.zz1-s.zz0)*e:1.6;fast=!!s.fast;
-  const ok=l=>l.filter(p=>pieces.includes(p)&&!p.sc);
-  if(s.k==='hero'||s.k==='low'||s.k==='track'){if(pieces.includes(s.p)){tg.copy(s.p.grp.position);tg.y+=s.k==='low'?.45:.7}}
-  else if(s.k==='group'||s.k==='lowgroup'){const l=ok(s.ps);if(l.length){tg.copy(cenOf(l,.7));zz=Math.max(1.15,Math.min(2.2,3.6/(spreadOf(l,tg)+1.7)))}}
-  else if(s.k==='wide'){tg.set(0,ty0,0)}
-  else if(s.k==='pull'){const c=pieces.includes(s.p)?s.p.grp.position.clone().add(new THREE.Vector3(0,.7,0)):new THREE.Vector3(0,ty0,0);tg.copy(c).lerp(new THREE.Vector3(0,ty0,0),e)}
-  else if(s.k==='pan'){tg.copy(s.a).lerp(s.b,e);fast=true}}
+  if(cVar==='track'){zz=2.3;ee=.42;ar=.3}else if(cVar==='low'){zz=2.15;ee=-.26;ar=.12}else if(cVar==='wide'){zz=1.12;ee=.4;ar=.2;tg.lerp(new THREE.Vector3(0,ty0,0),.55)}else{zz=fitZ(spreadOf(l,tg),3.4,1.2,2.1);ee=.38;ar=.22}}
+ else{if(!cShot||rn>cShot.t0+cShot.dur)cShot=mkShot(rn);const s=cShot,u=Math.min(1,(rn-s.t0)/s.dur),e=u*u*(3-2*u);ar=s.ar;ee=s.ee;zz=s.zz0+(s.zz1-s.zz0)*e;fast=s.fast;
+  if(s.k==='pan')tg.copy(s.a).lerp(s.b,e);else if(s.k==='pull')tg.set(0,s.y0+(ty0-s.y0)*e,0);else if(s.k==='lowtower')tg.set(0,ty0-1,0)}
  lastCen.copy(tg);
- camTgt.lerp(tg,1-Math.exp(-(fast?4.2:2.4)*dt));camZ+=(zz-camZ)*(1-Math.exp(-2*dt));el+=(ee-el)*(1-Math.exp(-1.8*dt));az+=dt*ar;updCam();tsStep(dt)}
+ camTgt.lerp(tg,1-Math.exp(-(fast?5:3)*dt));camZ+=(zz-camZ)*(1-Math.exp(-2.5*dt));el+=(ee-el)*(1-Math.exp(-2.2*dt));az+=dt*ar;updCam();tsStep(dt)}
 /* tilt-shift lens */
 const tsS=document.createElement('style');tsS.textContent='#ts{position:fixed;inset:0;pointer-events:none;z-index:3;opacity:0;transition:opacity .9s}#ts.on{opacity:1}#ts i{position:absolute;left:0;right:0;-webkit-backdrop-filter:blur(var(--b,7px));backdrop-filter:blur(var(--b,7px))}#ts i:first-child{top:0;height:var(--t,25%);-webkit-mask-image:linear-gradient(#000 25%,transparent);mask-image:linear-gradient(#000 25%,transparent)}#ts i:last-child{bottom:0;height:var(--u,25%);-webkit-mask-image:linear-gradient(transparent,#000 75%);mask-image:linear-gradient(transparent,#000 75%)}';document.head.append(tsS);
 const tsE=document.createElement('div');tsE.id='ts';tsE.innerHTML='<i></i><i></i>';document.body.append(tsE);let tsT=.25,tsU=.25;
@@ -604,9 +602,11 @@ function setA(n){if(aim===n)return;aim=n;applyTh()}
 function reset(){pieces.forEach(p=>{scene.remove(p.grp);p.hole&&scene.remove(p.hole)});pieces=[];
  wl&&scene.remove(wl);wl=null;fx.forEach(f=>f.kill());fx.length=0;g=Array(27).fill(0);turn=0;mvd=false;win=null;over=false;last='';pts=[0,0];pend=null;scoring=false;stars.forEach(s=>cam.remove(s));stars.length=0;setA(null)}
 function updCam(){if(cam.zoom!==camZ){cam.zoom=camZ;cam.updateProjectionMatrix()}cam.position.set(camTgt.x+Math.sin(az)*Math.cos(el)*40,camTgt.y+Math.sin(el)*40,camTgt.z+Math.cos(az)*Math.cos(el)*40);cam.lookAt(camTgt);dl.position.set(Math.sin(az-.46)*6.7,12,Math.cos(az-.46)*6.7);let bd=-9;posts.forEach(q=>{q.userData.d=q.userData.c[0]*Math.sin(az)+q.userData.c[1]*Math.cos(az);bd=Math.max(bd,q.userData.d)});posts.forEach(q=>q.visible=postsOn&&q.userData.d<bd-.01)}
+let offY=0;const saE=document.createElement('div');saE.style.cssText='position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px) 0';document.body.append(saE);
+function safeIn(){const cs=getComputedStyle(saE);return{t:parseFloat(cs.paddingTop)||0,b:parseFloat(cs.paddingBottom)||0}}
 function size(){W=innerWidth;fw=3*Math.SQRT2/.81;
- const Yt=B+T+2*SY,top=(Yt+1.9)*cE+1.414*sE+.25,bot=-2.121*sE-.335;fh=(top-bot)/.9;ctr=(top+bot)/2;H=innerHeight;{const as=W/H;if(as>=fw/fh)fw=fh*as;else fh=fw/as}ppu=H/fh;
- const ty=ctr/cE;ty0=ty;if(!cine&&!camBack)camTgt.set(0,ty,0);cam.left=-fw/2;cam.right=fw/2;cam.top=fh/2;cam.bottom=-fh/2;cam.updateProjectionMatrix();
+ const Yt=B+T+2*SY,top=(Yt+1.9)*cE+1.414*sE+.25,bot=-2.121*sE-.335;fh=(top-bot)/.9;ctr=(top+bot)/2;H=innerHeight;const sa=safeIn(),He=Math.max(200,H-sa.t-sa.b);fh=fh*H/He;{const as=W/H;if(as>=fw/fh)fw=fh*as;else fh=fw/as}ppu=H/fh;offY=(sa.t-sa.b)/2/ppu;
+ const ty=ctr/cE;ty0=ty;if(!cine&&!camBack)camTgt.set(0,ty,0);cam.left=-fw/2;cam.right=fw/2;cam.top=fh/2+offY;cam.bottom=-fh/2+offY;cam.updateProjectionMatrix();
  updCam();
  rend.setPixelRatio(Math.min(devicePixelRatio||1,2));rend.setSize(W,H,false);cv.style.width=W+'px';cv.style.height=H+'px'}
 const LINES_=LINES;
@@ -616,7 +616,7 @@ function place(){if(aim==null||over||pend||scoring||performance.now()<lockT||(ai
  if(!type){p.plane=new THREE.Plane(new THREE.Vector3(0,1,0),-Y);clip(grp,p.plane);
   p.hole=new THREE.Mesh(new THREE.CircleGeometry(.32,16),new THREE.MeshBasicMaterial({color:0,transparent:true}));
   p.hole.rotation.x=-PI/2;p.hole.position.set(x,Y+.01,z);scene.add(p.hole)}
- else{const r=cv.getBoundingClientRect(),px=Math.max(0,-r.top),ys=ty0*Math.cos(el)+fh/2-px/ppu;
+ else{const r=cv.getBoundingClientRect(),px=Math.max(0,-r.top),ys=ty0*Math.cos(el)+fh/2+offY-px/ppu;
   p.Ys=Math.max((ys+Math.sin(el)*(x*Math.sin(az)+z*Math.cos(az)))/Math.cos(el)+3,Y+4)}
  pieces.push(p);setA(null);
  g[a]=turn+1;scoreCheck();turn^=1;mvd=false}
